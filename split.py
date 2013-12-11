@@ -3,16 +3,30 @@
 # requires:
 # pip install coinbase
 
-from hashlib import sha256
 from coinbase import CoinbaseAccount
-import oauth2client
 
+# Create file info.py containing the following variables:
 from info import API_KEY, USERS
- 
-DIGITS58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+
+"""
+# Example USERS list
+USERS = [
+    {
+        'name'    : 'User 1',
+        'weight'  : 0.5,
+        'address' : 'abcdefg',
+    },
+    {
+        'name'    : 'User 2',
+        'weight'  : 0.5,
+        'address' : 'hijklmn',
+    },
+]
+"""
 
 
 def validate_address(addr):
+    # TODO: validate bitcoin addresses
     return True
 
 
@@ -69,7 +83,7 @@ def main():
         split = user["weight"] * bal
         total += split
         print "\t", user["name"], str(user["weight"]), str(split), "BTC"
-#        send_bitcoin(account, user["address"], split, "bitcoinparty")
+        send_bitcoin(account, user["address"], split, "bitcoinparty")
     
     print "split total:", str(total)
     print "coinbase balance:", str(account.balance), "BTC"
