@@ -11,15 +11,24 @@ from info import API_KEY, USERS
  
 DIGITS58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
+
 def validate_address(addr):
     return True
 
 
 def validate_users(users):
+    if users == None:
+        print "Missing list of users"
+        return False
+
     total_weight = 0
-    
     for user in users:
-        total_weight += user["weight"]
+        weight = user["weight"]
+        if weight < 0 or weight > 1:
+            print "User", user["name"], "has invalid weight"
+            return False
+
+        total_weight += weight
         if not validate_address(user["address"]):
             print "User", user["name"], "has invalid address"
             return False
@@ -34,26 +43,36 @@ def validate_users(users):
 
 
 def send_bitcoin(account, to, amount, note):
-    tx = account.send(to_address=to, amount=amount, notes=note)
-
-    print "Successfully sent", str(tx.amount), tx.amount.currency, "to", \
-          tx.recipient_address
-
+    try:
+        tx = account.send(to_address=to, amount=amount, notes=note)
+        print "\tSuccessfully sent", str(tx.amount), tx.amount.currency, \
+              "to", tx.recipient_address, "\n"
+    except:
+        print "\tError sending", str(amount), "to", to, "\n"
+    
     
 def main():
     if not validate_users(USERS):
         return 
     
     account = CoinbaseAccount(api_key=API_KEY)
-    print "balance:", str(account.balance)
+    bal = account.balance
+    print "coinbase balance:", str(bal), "BTC\n"
 
-    if account.balance > 1.0:
-        print "Splitting payment"
-        for user in USERS:
-            print user["name"], user["weight"]
-	    # send_bitcoin(account, user["address"], user["weight"], "")
+    if bal <= 0:
+        print "Insufficient funds to split"
+        return
+
+    total = 0
+    print "Splitting payment..."
+    for user in USERS:
+        split = user["weight"] * bal
+        total += split
+        print "\t", user["name"], str(user["weight"]), str(split), "BTC"
+#        send_bitcoin(account, user["address"], split, "bitcoinparty")
     
-    print "balance:", str(account.balance)
+    print "split total:", str(total)
+    print "coinbase balance:", str(account.balance), "BTC"
     
     
 if __name__ == "__main__":
